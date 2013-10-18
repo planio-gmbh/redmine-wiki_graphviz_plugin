@@ -123,11 +123,7 @@ module WikiGraphvizHelper
 		}
 
 		result = {}
-		begin
-			self.create_image_using_gv(layout, fmt, dot_text, result, temps)
-		rescue NotImplementedError, FalldownDotError
 			self.create_image_using_dot(layout, fmt, dot_text, result, temps) 
-		end
 
 		img = nil
 		maps = []
@@ -192,84 +188,6 @@ module WikiGraphvizHelper
 			p.call("failed to execute dot when creating map.")
 			return
 		end
-	end
-
-	def	create_image_using_gv(layout, fmt, dot_text, result, temps)
-		Rails.logger.info("[wiki_graphviz]using Gv")
-
-		pipes = IO.pipe
-
-		begin
-			pid = fork {
-				# child
-	
-				# Gv reports errors to stderr immediately.
-				# so, get the message from pipe
-				STDERR.reopen(pipes[1])
-	
-				begin
-					require 'gv'
-				rescue LoadError
-					exit! 5
-				end
-
-				g = nil
-				ec = 0
-				begin
-					g = Gv.readstring(dot_text)
-					if g.nil?
-						ec = 1
-						raise	"readstring"
-					end
-					r = Gv.layout(g, layout)
-					if !r
-						ec = 2
-						raise	"layout"
-					end
-					r = Gv.render(g, fmt[:type], temps[:img].path)
-					if !r
-						ec = 3
-						raise	"render"
-					end
-					r = Gv.render(g, "imap", temps[:map].path)
-					if !r
-						ec = 4
-						raise	"render imap"
-					end
-				rescue RuntimeError
-				ensure
-					if g
-						Gv.rm(g)
-					end
-				end
-				exit! ec
-			}
-
-			# parent
-			pipes[1].close
-
-			Process.waitpid pid
-			stat = $?
-			ec = stat.exitstatus
-			Rails.logger.info("[wiki_graphviz]child status: #{stat.inspect}")
-			if stat.exited? && ec == 5
-				# Chance to falldown using external dot command.
-				raise FalldownDotError, "failed to load Gv."
-			end
-
-			result[:message] = pipes[0].read.to_s.strip
-			if ec != 0 && result[:message] == ""
-				result[:message] = "Child process failed."
-			end
-
-		ensure
-			pipes.each {|p|
-				if !p.closed?
-					p.close
-				end
-			}
-		end
-
 	end
 
 private 
