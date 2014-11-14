@@ -14,8 +14,7 @@ Redmine::Plugin.register :wiki_graphviz_plugin do
 
 	Redmine::WikiFormatting::Macros.register do
 
-		desc <<'EOF'
-Render graph image from the wiki page which is specified by macro-args.
+		desc "Render graph image from the wiki page which is specified by macro-args.
 
 <pre>
 {{graphviz(Foo)}}
@@ -33,8 +32,25 @@ Render graph image from the wiki page which is specified by macro-args.
 ** align=value(e.g. {right|left})
 ** width=value(e.g. 100px, 200%)
 ** height=value(e.g. 100px, 200%)
-EOF
+", markdown: "Render graph image from the wiki page which is specified by macro-args.
 
+~~~~
+{{graphviz(Foo)}}
+{{graphviz(option=value...,Foo)}}
+~~~~
+
+- options are:
+  - format={png|jpg}
+  - layout={dot|neato|fdp|twopi|circo}
+  - target={_blank|any}
+  - with_source
+  - no_map
+  - wiki=page(which link to)
+  - link_to_image
+  - align=value(e.g. {right|left})
+  - width=value(e.g. 100px, 200%)
+  - height=value(e.g. 100px, 200%)
+"
 		plugin_directory = File.basename(File.dirname(__FILE__))
 		plugin_directory_is_valid = plugin_directory == 'wiki_graphviz_plugin'
 
@@ -46,8 +62,7 @@ EOF
 			m.graphviz(args).html_safe
 		end
 
-		desc <<'EOF'
-Render graph image from the current wiki page.
+		desc "Render graph image from the current wiki page.
 
 <pre>
 // {{graphviz_me}}
@@ -55,7 +70,16 @@ Render graph image from the current wiki page.
 </pre>
 
 * options: see graphviz macro.
-EOF
+", markdown: "Render graph image from the current wiki page.
+
+~~~~
+// {{graphviz_me}}
+// {{graphviz_me(option=value...)}}
+~~~~
+
+- options: see graphviz macro.
+"
+
 		macro	:graphviz_me do |wiki_content_obj, args|
 			if !plugin_directory_is_valid
 				raise "*** Plugin directory name of 'Graphviz Wiki-macro Plugin' is must be 'wiki_graphviz_plugin', but '#{plugin_directory}'"
@@ -65,8 +89,7 @@ EOF
 		end
 
 
-		desc <<'EOF'
-Render graph image from text within the macro command.
+		desc "Render graph image from text within the macro command.
 
 <pre>
 {{graphviz_link()
@@ -78,7 +101,19 @@ Render graph image from text within the macro command.
 </pre>
 
 * options: see graphviz macro.
-EOF
+", markdown: "Render graph image from text within the macro command.
+
+~~~~
+{{graphviz_link()
+  graphviz commands
+}}
+{{graphviz_link(option=value...,foo)
+  graphviz commands
+}}
+~~~~
+
+* options: see graphviz macro.
+"
 		macro	:graphviz_link do |wiki_content_obj, args, dottext |
 			if !plugin_directory_is_valid
 				raise "*** Plugin directory name of 'Graphviz Wiki-macro Plugin' is must be 'wiki_graphviz_plugin', but '#{plugin_directory}'"
