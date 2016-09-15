@@ -10,7 +10,6 @@ Redmine::Plugin.register :wiki_graphviz_plugin do |plugin|
   url "http://passing.breeze.cc/mt/"
   description 'Render graph image from the wiki contents by Graphviz(http://www.graphviz.org/)'
   version '0.7.0'
-	settings :default => {'cache_seconds' => '0'}, :partial => 'wiki_graphviz/settings'
 
 	Redmine::WikiFormatting::Macros.register do
 

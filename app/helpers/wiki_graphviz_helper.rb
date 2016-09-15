@@ -33,16 +33,7 @@ module WikiGraphvizHelper
 		layout = decide_layout(params[:layout])
 		fmt = decide_format(params[:format])
 
-		name = "wiki_graphviz_plugin." + Digest::SHA256.hexdigest( {
-			:layout => params[:layout],
-			:format => params[:format],
-			:dot_text => dot_text,
-		}.to_s)
-		cache_seconds = Setting.plugin_wiki_graphviz_plugin['cache_seconds'].to_i || 600
-		result = Rails.cache.fetch(name, :raw => false, :expires_in => cache_seconds) do
-			Rails.logger.info "[wiki_graphviz]not in cache: #{name}"
-			self.render_graph_exactly(layout, fmt, dot_text, options)
-		end
+		result = self.render_graph_exactly(layout, fmt, dot_text, options)
 
 		return result
 	end
